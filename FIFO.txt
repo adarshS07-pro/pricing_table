@@ -1,0 +1,91 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+use IEEE.STD_LOGIC_arith.ALL;
+
+entity fifo is
+    Port ( 
+        din : in STD_LOGIC_VECTOR(3 downto 0);   -- 4-bit data input
+        dout : out STD_LOGIC_VECTOR(3 downto 0);  -- 4-bit data output
+        rw : in STD_LOGIC;                        -- Read/Write control signal
+        rst : in STD_LOGIC;                       -- Reset signal
+        clk : in STD_LOGIC                        -- Clock signal
+    );
+end fifo;
+
+architecture Behavioral of fifo is
+    -- Define a memory array to hold 4 elements, each 4 bits wide
+    type mem is array(0 to 3) of std_logic_vector(3 downto 0);
+    
+    -- Declare a 2-bit address pointer
+    signal add : std_logic_vector(1 downto 0);
+    
+    -- Declare the memory array
+    signal a : mem;
+    
+begin
+    -- Process block for FIFO read/write operations
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            -- Reset the address pointer when rst is high
+            add <= "00";
+        elsif rising_edge(clk) then
+            if rw = '0' then
+                -- Write operation (rw = '0')
+                case add is
+                    when "00" => a(0) <= din; -- Write data to location 0
+                    when "01" => a(1) <= din; -- Write data to location 1
+                    when "10" => a(2) <= din; -- Write data to location 2
+                    when "11" => a(3) <= din; -- Write data to location 3
+                    when others => null;      -- Do nothing for other values (invalid)
+                end case;
+                -- Increment the address pointer for the next write
+                add <= std_logic_vector(unsigned(add) + 1);
+            else
+                -- Read operation (rw = '1')
+                case add is
+                    when "00" => dout <= a(0); -- Read data from location 0
+                    when "01" => dout <= a(1); -- Read data from location 1
+                    when "10" => dout <= a(2); -- Read data from location 2
+                    when "11" => dout <= a(3); -- Read data from location 3
+                    when others => null;      -- Do nothing for other values (invalid)
+                end case;
+                -- Increment the address pointer for the next read
+                add <= std_logic_vector(unsigned(add) + 1);
+            end if;
+        end if;
+    end process;
+    
+end Behavioral;
+
+
+Pin Locking:
+
+## Clock Constraint
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets clk_IBUF]
+set_property PACKAGE_PIN R2 [get_ports clk]
+set_property IOSTANDARD LVCMOS33 [get_ports clk]
+
+## Reset Signal
+set_property PACKAGE_PIN T1 [get_ports rst]
+set_property IOSTANDARD LVCMOS33 [get_ports rst]
+
+## Read/Write Control Signal
+set_property PACKAGE_PIN U1 [get_ports rw]
+set_property IOSTANDARD LVCMOS33 [get_ports rw]
+
+## Data Input (4 bits)
+set_property PACKAGE_PIN V17 [get_ports din[0]]
+set_property PACKAGE_PIN V16 [get_ports din[1]]
+set_property PACKAGE_PIN W16 [get_ports din[2]]
+set_property PACKAGE_PIN W17 [get_ports din[3]]
+set_property IOSTANDARD LVCMOS33 [get_ports {din[*]}]
+
+## Data Output (4 bits)
+set_property PACKAGE_PIN U16 [get_ports dout[0]]
+set_property PACKAGE_PIN E19 [get_ports dout[1]]
+set_property PACKAGE_PIN U19 [get_ports dout[2]]
+set_property PACKAGE_PIN V19 [get_ports dout[3]]
+set_property IOSTANDARD LVCMOS33 [get_ports {dout[*]}]
+

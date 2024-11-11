@@ -1,0 +1,95 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+-- Entity declaration for the ALU
+entity ALU is
+    Port (
+        areg, breg : in STD_LOGIC_VECTOR(3 downto 0);  -- 4-bit inputs
+        cin, al    : in STD_LOGIC;                     -- Carry-in and ALU mode selector
+        op         : in STD_LOGIC_VECTOR(1 downto 0);  -- Operation selector
+        dout       : out STD_LOGIC_VECTOR(3 downto 0); -- 4-bit result output
+        cout       : out STD_LOGIC                     -- Carry-out
+    );
+end ALU;
+
+architecture Behavioral of ALU is
+    signal at, bt, dt : STD_LOGIC_VECTOR(4 downto 0); -- Extended signals for arithmetic operations
+begin
+    -- Extend `areg` and `breg` to 5-bit signals by prepending '0' for arithmetic operations
+    at <= '0' & areg;
+    bt <= '0' & breg;
+
+    process(at, bt, cin, al, op)
+    begin
+        if al = '0' then
+            -- Arithmetic Operations (when `al` is 0)
+            case op is
+                when "00" => dt <= at + bt;           -- Addition
+                when "01" => dt <= at + bt + cin;     -- Addition with Carry-in
+                when "10" => dt <= at - bt;           -- Subtraction
+                when "11" => dt <= at - bt - cin;     -- Subtraction with Borrow (using Carry-in)
+                when others => null;                  -- Default case
+            end case;
+        else
+            -- Logic Operations (when `al` is 1)
+            case op is
+                when "00" => dt <= at and bt;         -- AND operation
+                when "01" => dt <= at or bt;          -- OR operation
+                when "10" => dt <= at xor bt;         -- XOR operation
+                when "11" => dt <= not at;            -- NOT operation (inverts `at`)
+                when others => null;                  -- Default case
+            end case;
+        end if;
+    end process;
+
+    -- Output Assignments
+    cout <= dt(4);             -- Assign the most significant bit of `dt` to carry-out
+    dout <= dt(3 downto 0);    -- Assign the 4 least significant bits of `dt` to output
+end Behavioral;
+
+
+
+
+Pin Locking:
+
+# ALU 4-bit Inputs `areg` and `breg`
+set_property PACKAGE_PIN W5 [get_ports {areg[0]}]
+set_property PACKAGE_PIN V5 [get_ports {areg[1]}]
+set_property PACKAGE_PIN U5 [get_ports {areg[2]}]
+set_property PACKAGE_PIN U4 [get_ports {areg[3]}]
+
+set_property PACKAGE_PIN W4 [get_ports {breg[0]}]
+set_property PACKAGE_PIN V4 [get_ports {breg[1]}]
+set_property PACKAGE_PIN U3 [get_ports {breg[2]}]
+set_property PACKAGE_PIN U2 [get_ports {breg[3]}]
+
+# Carry-In `cin`
+set_property PACKAGE_PIN V17 [get_ports cin]
+set_property IOSTANDARD LVCMOS33 [get_ports cin]
+
+# ALU Mode Selector `al`
+set_property PACKAGE_PIN W17 [get_ports al]
+set_property IOSTANDARD LVCMOS33 [get_ports al]
+
+# Operation Selector `op` (2-bit)
+set_property PACKAGE_PIN U16 [get_ports {op[0]}]
+set_property PACKAGE_PIN V16 [get_ports {op[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {op[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {op[1]}]
+
+# ALU 4-bit Output `dout`
+set_property PACKAGE_PIN W15 [get_ports {dout[0]}]
+set_property PACKAGE_PIN V15 [get_ports {dout[1]}]
+set_property PACKAGE_PIN U15 [get_ports {dout[2]}]
+set_property PACKAGE_PIN T15 [get_ports {dout[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {dout[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {dout[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {dout[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {dout[3]}]
+
+# Carry-Out `cout`
+set_property PACKAGE_PIN U14 [get_ports cout]
+set_property IOSTANDARD LVCMOS33 [get_ports cout]
+

@@ -1,0 +1,32 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Entity declaration for the half-adder
+entity halfadder is
+    Port (
+        a, b : in STD_LOGIC;  -- Single-bit inputs
+        s, c : out STD_LOGIC  -- Outputs: s is the sum, c is the carry
+    );
+end halfadder;
+
+-- Architecture definition with the logic for the half-adder
+architecture Behavioral of halfadder is
+begin
+    -- Sum output: XOR operation
+    s <= a xor b;
+
+    -- Carry output: AND operation
+    c <= a and b;
+end Behavioral;
+
+
+
+PinLock:
+ set_property PACKAGE_PIN v17  [get_ports a]
+ set_property PACKAGE_PIN v16  [get_ports b]
+ set_property PACKAGE_PIN u16  [get_ports s]
+ set_property PACKAGE_PIN e19  [get_ports c]
+ set_property IOSTANDARD LVCMOS33 [get_ports {a}]
+ set_property IOSTANDARD LVCMOS33 [get_ports {b}]
+ set_property IOSTANDARD LVCMOS33 [get_ports {s}]
+ set_property IOSTANDARD LVCMOS33 [get_ports {c}]

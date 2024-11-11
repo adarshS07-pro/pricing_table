@@ -1,0 +1,53 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity counter_4bit is
+    Port (
+        clk, rst : in STD_LOGIC;
+        q        : out STD_LOGIC_VECTOR(3 downto 0)
+    );
+end counter_4bit;
+
+architecture Behavioral of counter_4bit is
+    signal temp : STD_LOGIC_VECTOR(3 downto 0) := "0000";
+begin
+    process(clk, rst)
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                temp <= "0000";  -- Reset counter to zero
+            else
+                temp <= temp + 1;  -- Increment counter
+            end if;
+        end if;
+    end process;
+
+    q <= temp;  -- Output the current counter value
+end Behavioral;
+
+
+
+# Pin Locking for Counter 4-bit design
+
+# Clock Input (typically connected to the 100 MHz clock on the Basys3)
+set_property PACKAGE_PIN W5 [get_ports clk]  # Change W5 to the appropriate clock pin on the Basys3 board
+set_property IOSTANDARD LVCMOS33 [get_ports clk]  # Setting I/O standard for the clock pin
+
+# Reset Input (choose a pushbutton pin on the Basys3, e.g., BTNC for the reset)
+set_property PACKAGE_PIN V17 [get_ports rst]  # Choose a pin for reset, e.g., BTNC pin (check Basys3 pinout)
+set_property IOSTANDARD LVCMOS33 [get_ports rst]  # Setting I/O standard for reset pin
+
+# Output 4-bit Vector (q) to 4 LEDs (or any other output pins)
+set_property PACKAGE_PIN U16 [get_ports q[0]]  # First bit of the 4-bit output connected to an LED
+set_property PACKAGE_PIN U19 [get_ports q[1]]  # Second bit of the 4-bit output connected to an LED
+set_property PACKAGE_PIN V19 [get_ports q[2]]  # Third bit of the 4-bit output connected to an LED
+set_property PACKAGE_PIN W18 [get_ports q[3]]  # Fourth bit of the 4-bit output connected to an LED
+
+# Set I/O standard for the output pins
+set_property IOSTANDARD LVCMOS33 [get_ports {q[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {q[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {q[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {q[3]}]
+
